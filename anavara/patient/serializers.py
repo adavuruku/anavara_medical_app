@@ -8,7 +8,7 @@ class PatientSerializer(serializers.ModelSerializer):
     Serializer for Patient model.
     """
     # created_by = UserSerializer(source='user', write_only=True)
-    created_by = serializers.SerializerMethodField('get_selected_city_name')
+    created_by = serializers.SerializerMethodField('get_created_by')
     class Meta:
         model = Patient
         fields = [
@@ -30,3 +30,8 @@ class PatientSerializer(serializers.ModelSerializer):
             'address': {'required': True},'email_address': {'required': False},
             'phone_number': {'required': True},'first_name': {'required': True},
         }
+    
+    def get_created_by(self, obj):
+        request = self.context.get('request', None)
+        if request:
+            return UserSerializer(request.user).data

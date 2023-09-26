@@ -24,7 +24,7 @@ class Patient(models.Model):
     first_name = models.CharField(null=False, blank=False, max_length=10)
     last_name = models.CharField(null=False, blank=False, max_length=10)
     phone_number = models.CharField(max_length=11)
-    email_address = models.EmailField( max_length=10)
+    email_address = models.EmailField(null=True)
     address = models.TextField()
     created_by = models.ForeignKey(to=settings.AUTH_USER_MODEL,related_name='registered_patients', on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
