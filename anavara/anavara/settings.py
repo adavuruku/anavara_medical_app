@@ -46,7 +46,9 @@ INSTALLED_APPS = [
     'django_filters',
     'users',
     'patient',
+    'medical_record',
    'drf_yasg',
+   'phonenumber_field',
 ]
 
 MIDDLEWARE = [

@@ -1,27 +1,33 @@
-from django.shortcuts import render
 from rest_framework import generics
+from rest_framework import status
 from .models import Patient
-from .serializers import PatientSerializer
+from .serializers import PatientSerializer, PatientBodySerializer
 from rest_framework.permissions import IsAuthenticated
-
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-
+from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
 
 class CreatePatientView(generics.CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    queryset = Patient.objects.all()
-    # permission_classes = (AllowAny,)
     serializer_class = PatientSerializer
 
-    def perform_create(self, serializer):
-        return serializer.save(created_by=self.request.user)
+    @swagger_auto_schema( request_body=PatientBodySerializer, operation_description='Create a patient')
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        patient = serializer.save(created_by=self.request.user)
+        # generate hospital_id for patient
+        saved_id = 6 - len(str(patient.pk))
+        newId = "0" * saved_id + str(patient.pk)
+        patient.hospital_id = newId
+        patient.save()
+        return Response(PatientSerializer(patient).data, status=status.HTTP_200_OK)
+        
     
 
-@receiver(post_save, sender=Patient)
-def my_handler(sender, **kwargs):
-    if sender.hospital_id is not None:
-        saved_id = 6 - len(str(sender.pk))
-        newId = "0" * saved_id + str(sender.pk)
-        # sender.hospital_id = newId
-        sender.objects.update(hospital_id = newId) # .save()
+# @receiver(post_save, sender=Patient)
+# def my_handler(sender, **kwargs):
+#     if sender.hospital_id is not None:
+#         saved_id = 6 - len(str(sender.pk))
+#         newId = "0" * saved_id + str(sender.pk)
+#         # sender.hospital_id = newId
+#         sender.objects.update(hospital_id = newId) # .save()

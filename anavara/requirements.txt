@@ -7,3 +7,5 @@ django_filters
 drf_yasg
 django[argon2]
 six
+"django-phonenumber-field[phonenumbers]"
+django-extensions

@@ -9,6 +9,7 @@ from users.user_manager import UserManager;
 class User(AbstractUser):
     username = None
     email = models.EmailField(_('email address'), unique=True)
+    is_doctor = models.BooleanField(verbose_name='Indicate if user is a doctor',default=False)
 
     objects = UserManager()
     

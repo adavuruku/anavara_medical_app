@@ -29,14 +29,16 @@ class UserSerializer(serializers.ModelSerializer):
 
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     confirm_password = serializers.CharField(write_only=True, required=True)
+    is_doctor = serializers.BooleanField()
 
     class Meta:
         model = User
-        fields = ( 'password', 'email', 'first_name', 'last_name', 'confirm_password')
+        fields = ( 'password', 'email', 'first_name', 'last_name', 'confirm_password','is_doctor')
         extra_kwargs = {
             'first_name': {'required': True},
             'last_name': {'required': True},
-            'middle_name': {'required': False}
+            'middle_name': {'required': False},
+            'is_doctor': {'required': True}
         }
 
     def validate(self, attrs):
@@ -48,7 +50,8 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create(
             email=validated_data['email'],
             first_name=validated_data['first_name'],
-            last_name=validated_data['last_name']
+            last_name=validated_data['last_name'],
+            is_doctor=validated_data['is_doctor'],
         )
 
         user.set_password(validated_data['password'])

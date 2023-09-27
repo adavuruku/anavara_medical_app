@@ -9,6 +9,7 @@ from .serializers import MyTokenObtainPairSerializer, UserSerializer, ChangePass
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics
+from .permission import CanCreateMedicalRecord
 
 # for overriding the usermodel
 from django.contrib.auth import get_user_model
@@ -23,11 +24,12 @@ class MyObtainTokenPairView(TokenObtainPairView):
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     # permission_classes = (AllowAny,)
+    permission_classes = (CanCreateMedicalRecord,)
     serializer_class = UserSerializer
 
 class ChangePasswordView(generics.GenericAPIView):
     serializer_class = ChangePasswordSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,CanCreateMedicalRecord,)
 
     def patch(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
