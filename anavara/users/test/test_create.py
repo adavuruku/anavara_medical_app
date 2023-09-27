@@ -24,14 +24,6 @@ class UserViewSetTests(TestCase):
             "confirm_password": "test01",
             "is_doctor": True
         }
-        self.invalid_password_payload = {
-            "password": "Hadi001",
-            "email": "testcreate2@example.com",
-            "first_name": "Hadi001",
-            "last_name": "Hadi001",
-            "confirm_password": "Hadi001",
-            "is_doctor": True
-        }
 
         self.invalid_confirm_password_payload = {
             "password": "Mikey40",
@@ -50,6 +42,19 @@ class UserViewSetTests(TestCase):
             "confirm_password": "Mikey40",
             "is_doctor": True
         }
+
+        self.invalid_change_password_payload = {
+            "old_password": "Mikey40",
+            "new_password": "Mikey40",
+            "confirm_password": "Mikey40",
+        }
+
+        self.valid_change_password_payload = {
+            "old_password": "Mikey40",
+            "new_password": "Mikey40",
+            "confirm_password": "Mikey40",
+        }
+
 
     def test_create_valid_user(self):
         response = client.post(
