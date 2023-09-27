@@ -99,3 +99,10 @@ Only doctor and supper user can update and view this records.
 Also, doctor can only view and update records they created
 Super users can edit and update all record.
 ```
+# **RUNNING TEST**
+
+* change directory to the activated virtual environment and type
+> python manage.py test -v 2
+```
+The above command will run all the test cases 
+```
