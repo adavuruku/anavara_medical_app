@@ -25,6 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-8oet^#n^$kwpc%-zb8bx(&&!w^-!re@#15e3+xkj_$s$&=b)28'
 env = environ.Env()
+environ.Env.read_env()
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -90,6 +91,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
+    # 'default': env.db('DATABASE_URL',
+    #                   'postgres://postgres:root@127.0.0.1:5432/zona',
+    #                   'django.contrib.gis.db.backends.postgis'),
 }
 
 
@@ -144,17 +148,6 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
-    # 'DEFAULT_AUTHENTICATION_CLASSES': [
-    #     # 'rest_framework.authentication.BasicAuthentication',
-    #     # 'rest_framework.authentication.SessionAuthentication',
-    #     # 'rest_framework.authentication.TokenAuthentication',
-    #     'rest_framework_simplejwt.authentication.JWTAuthentication',
-    # ],
-    # # default permission classes is the one preventing use of the api
-    # # 'DEFAULT_PERMISSION_CLASSES': [
-    # #     'config.rest.permissions.DefaultPermission',
-    # # ],
-    
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
@@ -187,7 +180,8 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=2),
     'ALGORITHM': 'HS256',
-    'SIGNING_KEY': env('SECRET_KEY', default='zona_search_app'),
+    'ROTATE_REFRESH_TOKENS': True,
+    'SIGNING_KEY': env('SECRET_KEY', default='anavara_medical_app'),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
@@ -202,16 +196,15 @@ CORS_ALLOW_CREDENTIALS = True
 # ]
 
 
-from datetime import timedelta
-
-SIMPLE_JWT = {
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=15),
-    'ROTATE_REFRESH_TOKENS': True,
-}
-
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.Argon2PasswordHasher',
     'django.contrib.auth.hashers.PBKDF2PasswordHasher',
     'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
 ]
+
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='<email address>')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='<email password>')

@@ -11,6 +11,7 @@ class MedicalRecord(models.Model):
     doctor = models.ForeignKey(to=settings.AUTH_USER_MODEL,related_name='registered_medical_record', on_delete=models.PROTECT)
     patient = models.ForeignKey(to=Patient,related_name='my_medical_record', on_delete=models.PROTECT)
     treatment_date = models.DateField()
+    is_deleted = models.BooleanField(verbose_name='Indicate if user is a doctor',default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     class Meta:

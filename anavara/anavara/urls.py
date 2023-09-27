@@ -37,7 +37,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('users/', include('users.urls')),
     path('patients/', include('patient.urls')),
-    path('patients/add/medical_record', include('medical_record.urls')),
+    path('patients/medical_record/', include('medical_record.urls')),
 ]
 
 
