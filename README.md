@@ -2,7 +2,7 @@
 A medical app design for Anavara backend technical assessment role.
 
 # **How to set up the project**
-* first clone the project [Here](https://pages.github.com/)
+* first clone the project [Here](https://github.com/adavuruku/anavara_medical_app)
 * create a virtual env in the root folder using  python -m venv env
 * activate the virtual env using env\bin\activate   
 * install the requirement libraries python install -r requirements.txt
@@ -48,7 +48,9 @@ A medical app design for Anavara backend technical assessment role.
 * start the project using python manage.py runserver <portnumer>
 * add the base url example http://127.0.0.1:8080 to the env value CORS_ALLOWED_ORIGINS 8080 should be replaced with the port number you have used to start the project
 * API (Swagger documentation) can be found in http://127.0.0.1:<port number>/swagger/ 
-``` for example http://127.0.0.1:8081/swagger/ where 8081 will be replace with the port number you have started the poroject```
+```
+for example http://127.0.0.1:8081/swagger/ where 8081 will be replace with the port number you have started the poroject
+```
 
 # **Project Design**
 
@@ -59,17 +61,27 @@ the different users of the system are super users, doctors, and staff.
 Each of this user have role, access permission and the operation they can carried out in the system.
 ```
 * Super User
-``` A super user can carry out all operation available in the system and view, edit and create any record in the system ```
+```
+A super user can carry out all operation available in the system and view, edit and create any record in the system
+```
 
 * Doctor User
-``` A doctor user can create a patient record. Doctor can also create, view, edit and delete patient medical record of which they created  ```
+```
+A doctor user can create a patient record. Doctor can also create, view, edit and delete patient medical record of which they created
+```
 
 * Staff User
-``` A staff user have the minimal access as they can only create patient records ```
+```
+A staff user have the minimal access as they can only create patient records
+```
 * Other Operation
 
-``` Users can change or update their password by providing their previous and new password ```
-``` Users can request to reset their password by providing their email id which will then be used to validate the account and forward an email with a reset account link to change or update their the password```
+```
+Users can change or update their password by providing their previous and new password
+```
+```
+Users can request to reset their password by providing their email id which will then be used to validate the account and forward an email with a reset account link to change or update their the password
+```
 
 * **Patient Record** 
 ```
