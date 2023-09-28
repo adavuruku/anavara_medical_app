@@ -72,7 +72,7 @@ class MedicalRecordViewSetTests(TestCase):
             "patient_id": 1
         }
 
-    def test_update_valid_medical_record(self):
+    def test_delete_medical_record_successful(self):
         # create a doctor
         responseOne = client.post(
             reverse('user_register'),
@@ -102,21 +102,27 @@ class MedicalRecordViewSetTests(TestCase):
             content_type='application/json',
             **{'HTTP_AUTHORIZATION': f'Bearer {token}'}
         )
-        old_diagnosis = self.valid_create_medical_record_payload['diagnosis']
-        self.valid_create_medical_record_payload['diagnosis'] = 'test diagnosis'
+        
         medical_record_id = responseMed.json()['pk']
-        responseMedUpdate = client.patch(
+
+        responseMedDelete = client.delete(
             reverse('update_user_medical_record', kwargs={'medical_record_id':medical_record_id}),
-            data=json.dumps(self.valid_create_medical_record_payload,indent=4, sort_keys=True, default=str),
             content_type='application/json',
             **{'HTTP_AUTHORIZATION': f'Bearer {token}'}
         )
-        self.assertEqual(responseMedUpdate.status_code, status.HTTP_200_OK)
-        self.assertEqual(responseMedUpdate.json()['diagnosis'], 'test diagnosis')
-        self.assertNotEqual(responseMedUpdate.json()['diagnosis'], old_diagnosis)
+        self.assertEqual(responseMedDelete.status_code, status.HTTP_204_NO_CONTENT)
+
+        # fetching the record should return 404
+        responseMedGet = client.get(
+            reverse('get_patient_single_medical_record', kwargs={'medical_record_id':medical_record_id}),
+            content_type='application/json',
+            **{'HTTP_AUTHORIZATION': f'Bearer {token}'}
+        )
+        self.assertEqual(responseMedGet.status_code, status.HTTP_404_NOT_FOUND)
+        # self.assertEqual(responseMedGet.json()['message'], 'Patient record doesnt exist')
     
-
-    def test_update_medical_record_that_dont_exist(self):
+    
+    def test_doctor_delete_medical_record_created_by_another_doctor(self):
         # create a doctor
         responseOne = client.post(
             reverse('user_register'),
@@ -146,109 +152,7 @@ class MedicalRecordViewSetTests(TestCase):
             content_type='application/json',
             **{'HTTP_AUTHORIZATION': f'Bearer {token}'}
         )
-        old_diagnosis = self.valid_create_medical_record_payload['diagnosis']
-        self.valid_create_medical_record_payload['diagnosis'] = 'test diagnosis'
-        medical_record_id = responseMed.json()['pk']+2
-        responseMedUpdate = client.patch(
-            reverse('update_user_medical_record', kwargs={'medical_record_id':medical_record_id}),
-            data=json.dumps(self.valid_create_medical_record_payload,indent=4, sort_keys=True, default=str),
-            content_type='application/json',
-            **{'HTTP_AUTHORIZATION': f'Bearer {token}'}
-        )
-        self.assertEqual(responseMedUpdate.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_unauthorised_user_to_update_medical_record(self):
-        # create a doctor
-        responseOne = client.post(
-            reverse('user_register'),
-            data=json.dumps(self.valid_doctor_one_payload),
-            content_type='application/json'
-        )
-        # login a doctor
-        responsetwo = client.post(
-            reverse('token_obtain_pair'),
-            data=json.dumps(self.valid_doctor_one_login),
-            content_type='application/json'
-        )
-
-        token =responsetwo.json()['access']
-
-        # create a patient
-        responsePatient = client.post(
-            reverse('add_new_patients_record'),
-            data=json.dumps(self.create_patient_payload),
-            content_type='application/json',
-            **{'HTTP_AUTHORIZATION': f'Bearer {token}'}
-        )
-        self.valid_create_medical_record_payload['patient_id'] = responsePatient.json()['pk']
-        responseMed = client.post(
-            reverse('add_new_medical_record'),
-            data=json.dumps(self.valid_create_medical_record_payload,indent=4, sort_keys=True, default=str),
-            content_type='application/json',
-            **{'HTTP_AUTHORIZATION': f'Bearer {token}'}
-        )
-        old_diagnosis = self.valid_create_medical_record_payload['diagnosis']
-        self.valid_create_medical_record_payload['diagnosis'] = 'test diagnosis'
-        medical_record_id = responseMed.json()['pk']+2
-        
-        # create and login a staff user -> staff users cant create, delete and update a medical record 
-        responseStaff = client.post(
-            reverse('user_register'),
-            data=json.dumps(self.valid_staff_payload),
-            content_type='application/json'
-        )
-        # login a doctor
-        responsestafflogin = client.post(
-            reverse('token_obtain_pair'),
-            data=json.dumps(self.valid_staff_login),
-            content_type='application/json'
-        )
-
-        token =responsestafflogin.json()['access']
-        
-        responseMedUpdate = client.patch(
-            reverse('update_user_medical_record', kwargs={'medical_record_id':medical_record_id}),
-            data=json.dumps(self.valid_create_medical_record_payload,indent=4, sort_keys=True, default=str),
-            content_type='application/json',
-            **{'HTTP_AUTHORIZATION': f'Bearer {token}'}
-        )
-        self.assertEqual(responseMedUpdate.status_code, status.HTTP_403_FORBIDDEN)
-
-
-    def test_user_to_update_medical_record_they_didnt_create(self):
-        # create a doctor
-        responseOne = client.post(
-            reverse('user_register'),
-            data=json.dumps(self.valid_doctor_one_payload),
-            content_type='application/json'
-        )
-        # login a doctor
-        responsetwo = client.post(
-            reverse('token_obtain_pair'),
-            data=json.dumps(self.valid_doctor_one_login),
-            content_type='application/json'
-        )
-
-        token =responsetwo.json()['access']
-
-        # create a patient
-        responsePatient = client.post(
-            reverse('add_new_patients_record'),
-            data=json.dumps(self.create_patient_payload),
-            content_type='application/json',
-            **{'HTTP_AUTHORIZATION': f'Bearer {token}'}
-        )
-        self.valid_create_medical_record_payload['patient_id'] = responsePatient.json()['pk']
-        responseMed = client.post(
-            reverse('add_new_medical_record'),
-            data=json.dumps(self.valid_create_medical_record_payload,indent=4, sort_keys=True, default=str),
-            content_type='application/json',
-            **{'HTTP_AUTHORIZATION': f'Bearer {token}'}
-        )
-        old_diagnosis = self.valid_create_medical_record_payload['diagnosis']
-        self.valid_create_medical_record_payload['diagnosis'] = 'test diagnosis'
-        medical_record_id = responseMed.json()['pk']+2
-        
         # create another doctor different from the doctor that creates the medical records
         responseStaff = client.post(
             reverse('user_register'),
@@ -262,17 +166,26 @@ class MedicalRecordViewSetTests(TestCase):
             content_type='application/json'
         )
 
-        token =responsestafflogin.json()['access']
+        tokenDocTwo =responsestafflogin.json()['access']
+
         
-        responseMedUpdate = client.patch(
+        medical_record_id = responseMed.json()['pk']
+        responseMedDelete = client.delete(
             reverse('update_user_medical_record', kwargs={'medical_record_id':medical_record_id}),
-            data=json.dumps(self.valid_create_medical_record_payload,indent=4, sort_keys=True, default=str),
+            content_type='application/json',
+            **{'HTTP_AUTHORIZATION': f'Bearer {tokenDocTwo}'}
+        )
+        self.assertEqual(responseMedDelete.status_code, status.HTTP_404_NOT_FOUND)
+
+        # fetching the record should return 200 - since is not deleted
+        responseMedGet = client.get(
+            reverse('get_patient_single_medical_record', kwargs={'medical_record_id':medical_record_id}),
             content_type='application/json',
             **{'HTTP_AUTHORIZATION': f'Bearer {token}'}
         )
-        self.assertEqual(responseMedUpdate.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(responseMedGet.status_code, status.HTTP_200_OK)
 
-    def test_using_expired_or_invalid_token_to_update_medical_record(self):
+    def test_unauthorised_invalid_token_delete_medical_record(self):
         # create a doctor
         responseOne = client.post(
             reverse('user_register'),
@@ -302,17 +215,163 @@ class MedicalRecordViewSetTests(TestCase):
             content_type='application/json',
             **{'HTTP_AUTHORIZATION': f'Bearer {token}'}
         )
-        old_diagnosis = self.valid_create_medical_record_payload['diagnosis']
-        self.valid_create_medical_record_payload['diagnosis'] = 'test diagnosis'
-        medical_record_id = responseMed.json()['pk']+2
-        
-        
-        token =token+'invalidtoken'
-        
-        responseMedUpdate = client.patch(
+
+        badToken =responsetwo.json()['access']+'invalid_token'
+        medical_record_id = responseMed.json()['pk']
+        responseMedDelete = client.delete(
             reverse('update_user_medical_record', kwargs={'medical_record_id':medical_record_id}),
+            content_type='application/json',
+            **{'HTTP_AUTHORIZATION': f'Bearer {badToken}'}
+        )
+        self.assertEqual(responseMedDelete.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # fetching the record should return 200 - since is not deleted
+        responseMedGet = client.get(
+            reverse('get_patient_single_medical_record', kwargs={'medical_record_id':medical_record_id}),
+            content_type='application/json',
+            **{'HTTP_AUTHORIZATION': f'Bearer {token}'}
+        )
+        self.assertEqual(responseMedGet.status_code, status.HTTP_200_OK)
+
+        # WITH NO token at all
+        responseMedDelete = client.delete(
+            reverse('update_user_medical_record', kwargs={'medical_record_id':medical_record_id}),
+            content_type='application/json'
+        )
+        self.assertEqual(responseMedDelete.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # fetching the record should return 200 - since is not deleted
+        responseMedGet = client.get(
+            reverse('get_patient_single_medical_record', kwargs={'medical_record_id':medical_record_id}),
+            content_type='application/json',
+            **{'HTTP_AUTHORIZATION': f'Bearer {token}'}
+        )
+        self.assertEqual(responseMedGet.status_code, status.HTTP_200_OK)
+
+    
+    def test_doctor_delete_medical_record_created_by_another_doctor(self):
+        # create a doctor
+        responseOne = client.post(
+            reverse('user_register'),
+            data=json.dumps(self.valid_doctor_one_payload),
+            content_type='application/json'
+        )
+        # login a doctor
+        responsetwo = client.post(
+            reverse('token_obtain_pair'),
+            data=json.dumps(self.valid_doctor_one_login),
+            content_type='application/json'
+        )
+
+        token =responsetwo.json()['access']
+
+        # create a patient
+        responsePatient = client.post(
+            reverse('add_new_patients_record'),
+            data=json.dumps(self.create_patient_payload),
+            content_type='application/json',
+            **{'HTTP_AUTHORIZATION': f'Bearer {token}'}
+        )
+        self.valid_create_medical_record_payload['patient_id'] = responsePatient.json()['pk']
+        responseMed = client.post(
+            reverse('add_new_medical_record'),
             data=json.dumps(self.valid_create_medical_record_payload,indent=4, sort_keys=True, default=str),
             content_type='application/json',
             **{'HTTP_AUTHORIZATION': f'Bearer {token}'}
         )
-        self.assertEqual(responseMedUpdate.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # create another doctor different from the doctor that creates the medical records
+        responseStaff = client.post(
+            reverse('user_register'),
+            data=json.dumps(self.valid_doctor_two_payload),
+            content_type='application/json'
+        )
+        # login the doctor and try to use its token to update record of doctor one
+        responsestafflogin = client.post(
+            reverse('token_obtain_pair'),
+            data=json.dumps(self.valid_doctor_two_login),
+            content_type='application/json'
+        )
+
+        tokenDocTwo =responsestafflogin.json()['access']
+
+        
+        medical_record_id = responseMed.json()['pk']
+        responseMedDelete = client.delete(
+            reverse('update_user_medical_record', kwargs={'medical_record_id':medical_record_id}),
+            content_type='application/json',
+            **{'HTTP_AUTHORIZATION': f'Bearer {tokenDocTwo}'}
+        )
+        self.assertEqual(responseMedDelete.status_code, status.HTTP_404_NOT_FOUND)
+
+        # fetching the record should return 200 - since is not deleted
+        responseMedGet = client.get(
+            reverse('get_patient_single_medical_record', kwargs={'medical_record_id':medical_record_id}),
+            content_type='application/json',
+            **{'HTTP_AUTHORIZATION': f'Bearer {token}'}
+        )
+        self.assertEqual(responseMedGet.status_code, status.HTTP_200_OK)
+
+    
+    def test_staff_user_deleting_record(self):
+        # create a doctor
+        responseOne = client.post(
+            reverse('user_register'),
+            data=json.dumps(self.valid_doctor_one_payload),
+            content_type='application/json'
+        )
+        # login a doctor
+        responsetwo = client.post(
+            reverse('token_obtain_pair'),
+            data=json.dumps(self.valid_doctor_one_login),
+            content_type='application/json'
+        )
+
+        token =responsetwo.json()['access']
+
+        # create a patient
+        responsePatient = client.post(
+            reverse('add_new_patients_record'),
+            data=json.dumps(self.create_patient_payload),
+            content_type='application/json',
+            **{'HTTP_AUTHORIZATION': f'Bearer {token}'}
+        )
+        self.valid_create_medical_record_payload['patient_id'] = responsePatient.json()['pk']
+        responseMed = client.post(
+            reverse('add_new_medical_record'),
+            data=json.dumps(self.valid_create_medical_record_payload,indent=4, sort_keys=True, default=str),
+            content_type='application/json',
+            **{'HTTP_AUTHORIZATION': f'Bearer {token}'}
+        )
+
+        # create a staff user
+        responseStaff = client.post(
+            reverse('user_register'),
+            data=json.dumps(self.valid_staff_payload),
+            content_type='application/json'
+        )
+        # login the doctor and try to use its token to update record of doctor one
+        responsestafflogin = client.post(
+            reverse('token_obtain_pair'),
+            data=json.dumps(self.valid_staff_login),
+            content_type='application/json'
+        )
+
+        tokenDocTwo =responsestafflogin.json()['access']
+
+        
+        medical_record_id = responseMed.json()['pk']
+        responseMedDelete = client.delete(
+            reverse('update_user_medical_record', kwargs={'medical_record_id':medical_record_id}),
+            content_type='application/json',
+            **{'HTTP_AUTHORIZATION': f'Bearer {tokenDocTwo}'}
+        )
+        self.assertEqual(responseMedDelete.status_code, status.HTTP_403_FORBIDDEN)
+
+        # fetching the record should return 200 - since is not deleted
+        responseMedGet = client.get(
+            reverse('get_patient_single_medical_record', kwargs={'medical_record_id':medical_record_id}),
+            content_type='application/json',
+            **{'HTTP_AUTHORIZATION': f'Bearer {token}'}
+        )
+        self.assertEqual(responseMedGet.status_code, status.HTTP_200_OK)

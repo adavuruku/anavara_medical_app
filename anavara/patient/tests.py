@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 # initialize the APIClient app
 client = Client()
 token = None
-class UserViewSetTests(TestCase):
+class PatientViewSetTests(TestCase):
 
     def setUp(self):
         self.valid_payload = {

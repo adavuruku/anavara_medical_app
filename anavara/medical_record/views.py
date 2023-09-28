@@ -98,10 +98,12 @@ class RetrieveAUserMedicalRecord(generics.GenericAPIView):
     
     def get_queryset(self):
         user_record = UserSerializer(self.request.user).data
-        qs = super().get_queryset()
+        # qs = super().get_queryset()
         record = None
         if self.request.user.is_superuser:
-            record = qs.filter(pk=self.kwargs.get('medical_record_id'), is_deleted= False)
+            record = get_object_or_404(MedicalRecord, pk=self.kwargs.get('medical_record_id'), is_deleted= False)
+            # record = qs.filter(pk=self.kwargs.get('medical_record_id'), is_deleted= False)
         if user_record["is_doctor"]:
-            record = qs.filter(pk=self.kwargs.get('medical_record_id'), doctor = self.request.user, is_deleted= False)
+            record = get_object_or_404(MedicalRecord, pk=self.kwargs.get('medical_record_id'), doctor = self.request.user, is_deleted= False)
+            # record = qs.filter(pk=self.kwargs.get('medical_record_id'), doctor = self.request.user, is_deleted= False)
         return record

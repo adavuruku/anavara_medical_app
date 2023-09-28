@@ -13,7 +13,7 @@ client = Client()
 token = None
 today = date.today()
 past_day = today - timedelta(days=10)
-class UserViewSetTests(TestCase):
+class MedicalRecordViewSetTests(TestCase):
 
     def setUp(self):
         self.valid_doctor_one_payload = {
